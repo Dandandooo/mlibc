@@ -18,6 +18,7 @@ __setjmp:
 	sd s10, 88(a0)
 	sd s11, 96(a0)
 	sd sp, 104(a0)
+#ifdef __riscv_flen
 	fsd fs0, 112(a0)
 	fsd fs1, 120(a0)
 	fsd fs2, 128(a0)
@@ -30,6 +31,7 @@ __setjmp:
 	fsd fs9, 184(a0)
 	fsd fs10, 192(a0)
 	fsd fs11, 200(a0)
+#endif
 	bne a2, zero, 1f
 	sw zero, JMP_BUF_SAVESIGS_OFFSET(a0)
 	li a0, 0
@@ -74,6 +76,7 @@ _longjmp:
 	ld s10,88(a0)
 	ld s11,96(a0)
 	ld sp,104(a0)
+#ifdef __riscv_flen
 	fld fs0,112(a0)
 	fld fs1,120(a0)
 	fld fs2,128(a0)
@@ -86,6 +89,7 @@ _longjmp:
 	fld fs9,184(a0)
 	fld fs10,192(a0)
 	fld fs11,200(a0)
+#endif
 	seqz a0,a1
 	add a0,a0,a1
 	ret

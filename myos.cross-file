@@ -15,5 +15,5 @@ cpu = 'unknown'
 endian = 'little'
 
 [built-in options]
-c_args = ['-mcmodel=medany']
-cpp_args = ['-mcmodel=medany']
+c_args   = ['-mcmodel=medany', '-D_GNU_SOURCE']
+cpp_args = ['-mcmodel=medany', '-D_GNU_SOURCE']
