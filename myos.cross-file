@@ -2,12 +2,11 @@
 skip_sanity_check = true
 
 [binaries]
-c = ['riscv64-myos-gcc']
-cpp = ['riscv64-myos-g++']
-ar = ['riscv64-myos-ar']
-strip = ['riscv64-myos-strip']
-ld = ['riscv64-myos-ld']
-ranlib = ['riscv64-myos-ranlib']
+c   = ['zig', 'cc',  '-target', 'riscv64-freestanding-none', '-mcpu=generic_rv64+m+a+c+zicsr+zifencei']
+cpp = ['zig', 'c++', '-target', 'riscv64-freestanding-none', '-mcpu=generic_rv64+m+a+c+zicsr+zifencei', '-nostdinc++']
+ar = ['zig', 'ar']
+ranlib = ['zig', 'ranlib']
+strip = ['riscv64-unkown-elf-strip']
 
 [host_machine]
 system = 'myos'
@@ -16,5 +15,5 @@ cpu = 'unknown'
 endian = 'little'
 
 [built-in options]
-c_args = ['-march=rv64gc', '-mabi=lp64d', '-mcmodel=medany']
-cpp_args = ['-march=rv64gc', '-mabi=lp64d', '-mcmodel=medany']
+c_args = ['-mcmodel=medany']
+cpp_args = ['-mcmodel=medany']
