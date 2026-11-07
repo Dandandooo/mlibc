@@ -33,8 +33,10 @@ extern "C" void __rudra_mlibc_enter_thread(void *entry, void *user_arg, Tcb *tcb
 
 
 int bad_heap_alloc(size_t size, void ** pointer) {
+	// No memset: heap_base only grows, so these addresses have never been
+	// mapped, and the kernel hands out zeroed pages when they first fault in.
+	// Touching the range here would fault in every page up front.
 	static uintptr_t heap_base = 0xFFFFFFFFE0000000;
-	memset((void *)heap_base, 0, size);
 	*pointer = (void *) heap_base;
 	heap_base += align_up(size, 4096);
 	return 0;
