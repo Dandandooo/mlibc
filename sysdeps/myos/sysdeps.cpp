@@ -95,10 +95,19 @@ int Sysdeps<Fork>::operator()(pid_t * child) {
 }
 
 int Sysdeps<Waitpid>::operator()(pid_t pid, int *status, int flags, struct rusage *ru, pid_t *ret_pid) {
-	(void)ru;
-	int result = syscall(SYSCALL_WAITPID, pid, status, flags);
-	
+	// Kernel fills only CPU times (see RUsage in sys/api/syscall.zig).
+	struct { unsigned long utime_ns, stime_ns; } ku;
+	int result = syscall(SYSCALL_WAITPID, pid, status, flags, ru ? &ku : nullptr);
+
 	if (result < 0) return -result;
+
+	if (ru) {
+		memset(ru, 0, sizeof(*ru));
+		ru->ru_utime.tv_sec = ku.utime_ns / 1000000000UL;
+		ru->ru_utime.tv_usec = (ku.utime_ns % 1000000000UL) / 1000;
+		ru->ru_stime.tv_sec = ku.stime_ns / 1000000000UL;
+		ru->ru_stime.tv_usec = (ku.stime_ns % 1000000000UL) / 1000;
+	}
 
 	*ret_pid = result;
 	return 0;
@@ -298,8 +307,14 @@ int Sysdeps<VmMap>::operator()(void *, size_t, int, int, int, off_t, void **) {
 int Sysdeps<VmUnmap>::operator()(void *, size_t) {
 	STUB();
 }
-int Sysdeps<ClockGet>::operator()(int, time_t *, long *) {
-	STUB();
+// The kernel only has a since-boot clock, so every clockid reads it.
+int Sysdeps<ClockGet>::operator()(int, time_t *secs, long *nanos) {
+	long ns = syscall(SYSCALL_CLOCKGET);
+	if (ns < 0)
+		return -ns;
+	*secs = ns / 1000000000L;
+	*nanos = ns % 1000000000L;
+	return 0;
 }
 
 int Sysdeps<Sleep>::operator()(time_t *secs, long *nanos) {
